@@ -2,7 +2,7 @@ import { EQUIPMENT } from '@roamlift/core';
 import { router } from 'expo-router';
 import { View } from 'react-native';
 import { Button, Card, H1, H2, Label, P, Screen } from '../components/ui';
-import { backendReady } from '../lib/api';
+import { backendReady, nearbyReady } from '../lib/api';
 import { rememberGym, setState, useStore, type Gym } from '../lib/store';
 import { space } from '../lib/theme';
 
@@ -45,8 +45,8 @@ export default function Home() {
       ) : null}
 
       <View style={{ gap: space(2) }}>
-        <Button title="Find gyms near me" onPress={() => router.push('/nearby')} disabled={!backendReady} />
-        <Button kind="secondary" title="Scan a new spot" onPress={startFresh} />
+        {nearbyReady ? <Button title="Find gyms near me" onPress={() => router.push('/nearby')} /> : null}
+        <Button kind={nearbyReady ? 'secondary' : 'primary'} title="Scan a new spot" onPress={startFresh} />
         <Button kind="quiet" title="Pick my kit by hand" onPress={() => { setState({ gym: { name: 'My spot', kit: [] }, detected: null }); router.push('/kit'); }} />
         {history.length ? <Button kind="quiet" title={`Progress · ${history.length} workout${history.length > 1 ? 's' : ''}`} onPress={() => router.push('/history')} /> : null}
         {!backendReady ? <P muted small>Offline mode: scanning and the gym map turn on once the backend is connected. Manual kit and plans work now.</P> : null}

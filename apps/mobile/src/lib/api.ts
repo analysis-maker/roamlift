@@ -3,6 +3,8 @@ import type { Gym } from './store';
 import { ensureSession, supabase } from './supabase';
 
 export const backendReady = supabase !== null;
+/** Nearby search needs a Google Maps key on the server; hidden until that is set. */
+export const nearbyReady = backendReady && process.env.EXPO_PUBLIC_NEARBY === '1';
 
 export interface ScanImage {
   /** Base64 JPEG, already resized on the device. */
