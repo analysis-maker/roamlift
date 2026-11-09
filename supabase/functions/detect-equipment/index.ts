@@ -40,6 +40,7 @@ function prompt(catalog: CatalogEntry[]): string {
     'Map each item to exactly one catalogue id below. Merge the same item seen in several photos. Ignore people, TVs, towels and decor.',
     'If a machine is out of order, roped off or covered, leave it out. If you are unsure what a machine is, give your best id with low confidence.',
     'Read dumbbell and stack weights only when the numbers are legible.',
+    'Reply only by calling the report_equipment tool.',
     '',
     'Catalogue:',
     list,
@@ -79,7 +80,8 @@ Deno.serve(async (req) => {
         model: env('DETECTION_MODEL', 'claude-sonnet-5-5'),
         max_tokens: 2000,
         tools: [TOOL],
-        tool_choice: { type: 'tool', name: TOOL.name },
+        // Newer models reject forced tool choice, so ask for the tool and parse a JSON fallback.
+        tool_choice: { type: 'auto' },
         messages: [{
           role: 'user',
           content: [
@@ -94,9 +96,15 @@ Deno.serve(async (req) => {
       return json({ error: 'Detection failed' }, 502);
     }
     const out = await res.json();
-    const call = (out.content ?? []).find((c: { type: string }) => c.type === 'tool_use');
+    const blocks = (out.content ?? []) as { type: string; input?: { items?: unknown }; text?: string }[];
+    let raw: unknown = blocks.find((c) => c.type === 'tool_use')?.input?.items;
+    if (!Array.isArray(raw)) {
+      const text = blocks.filter((c) => c.type === 'text').map((c) => c.text).join('\n');
+      const m = text.match(/\{[\s\S]*\}/);
+      try { raw = m ? JSON.parse(m[0]).items : []; } catch { raw = []; }
+    }
     const ids = new Set(catalog.map((c) => c.id));
-    const items = ((call?.input?.items ?? []) as Record<string, unknown>[]).map((i) => ({
+    const items = ((Array.isArray(raw) ? raw : []) as Record<string, unknown>[]).map((i) => ({
       ...i,
       equipment_id: typeof i.equipment_id === 'string' && ids.has(i.equipment_id) ? i.equipment_id : null,
     }));
