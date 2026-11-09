@@ -41,6 +41,12 @@ const head = `
     <meta name="apple-mobile-web-app-title" content="Roamlift" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="theme-color" content="#10181C" />
+    <style>
+      /* Paint behind the app too, so iOS home-screen mode shows no white band at the bottom. */
+      html,body{background:#F4F3EF}
+      @media (prefers-color-scheme: dark){html,body{background:#0C1215}}
+      html,body,#root{min-height:100%;min-height:100dvh}
+    </style>
     <script>if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('${base}/sw.js',{scope:'${base}/'}).catch(()=>{}));</script>
   </head>`;
 const indexPath = join(out, 'index.html');
