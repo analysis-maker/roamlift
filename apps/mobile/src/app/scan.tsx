@@ -2,7 +2,7 @@ import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Image, Pressable, TextInput, View } from 'react-native';
+import { Image, Platform, Pressable, TextInput, View } from 'react-native';
 import { Button, Label, Notice, P, Row, Screen } from '../components/ui';
 import { backendReady, detectEquipment, type ScanImage } from '../lib/api';
 import { setState, useStore } from '../lib/store';
@@ -10,10 +10,31 @@ import { space, useTheme } from '../lib/theme';
 
 const MAX_PHOTOS = 10;
 
+const MAX_SIDE = 1024;
+
+/** Web: decode, scale the long side to MAX_SIDE and re-encode as JPEG with a plain canvas. */
+async function prepareWeb(uri: string): Promise<ScanImage> {
+  const img = new window.Image();
+  img.src = uri;
+  await img.decode();
+  const w0 = img.naturalWidth || img.width;
+  const h0 = img.naturalHeight || img.height;
+  if (!w0 || !h0) throw new Error('Could not read one of the photos.');
+  const k = Math.min(1, MAX_SIDE / Math.max(w0, h0));
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.max(1, Math.round(w0 * k));
+  canvas.height = Math.max(1, Math.round(h0 * k));
+  canvas.getContext('2d')!.drawImage(img, 0, 0, canvas.width, canvas.height);
+  const data = canvas.toDataURL('image/jpeg', 0.6).split(',')[1];
+  if (!data) throw new Error('Could not read one of the photos.');
+  return { data, mediaType: 'image/jpeg' };
+}
+
 /** Shrink each photo before upload: faster, cheaper, and plenty for spotting a cable stack. */
 async function prepare(uri: string): Promise<ScanImage> {
+  if (Platform.OS === 'web') return prepareWeb(uri);
   const ctx = ImageManipulator.manipulate(uri);
-  ctx.resize({ width: 1024, height: null });
+  ctx.resize({ width: MAX_SIDE });
   const img = await ctx.renderAsync();
   const out = await img.saveAsync({ format: SaveFormat.JPEG, compress: 0.6, base64: true });
   if (!out.base64) throw new Error('Could not read one of the photos.');
@@ -47,7 +68,8 @@ export default function Scan() {
     setBusy(true);
     setError(null);
     try {
-      const images = await Promise.all(photos.map(prepare));
+      const images: ScanImage[] = [];
+      for (const uri of photos) images.push(await prepare(uri)); // one at a time keeps phone memory low
       const detected = await detectEquipment(images);
       setState((s) => ({ detected, gym: { ...(s.gym ?? { kit: [] }), name: name.trim() || 'My spot', kit: detected.items.filter((i) => i.checked).map((i) => i.id) } }));
       router.push('/kit');
