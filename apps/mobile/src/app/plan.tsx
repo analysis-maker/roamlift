@@ -1,6 +1,7 @@
 import { setsForWeek } from '@roamlift/core';
 import { router } from 'expo-router';
 import { Pressable, Text, View } from 'react-native';
+import { DemoThumb } from '../components/ExerciseDemo';
 import { Button, Card, Chip, H2, Label, Notice, P, Row, Screen } from '../components/ui';
 import { getState, setState, useStore } from '../lib/store';
 import { buildPlan } from '../lib/plan';
@@ -62,7 +63,8 @@ export default function PlanScreen() {
             <P muted small>~{s.estimatedMinutes} min</P>
           </Row>
           {s.exercises.map((e) => (
-            <View key={e.exerciseId} style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: space(2), borderTopWidth: 1, borderTopColor: t.line, gap: space(2) }}>
+            <View key={e.exerciseId} style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: space(2), borderTopWidth: 1, borderTopColor: t.line, gap: space(3) }}>
+              <DemoThumb exerciseId={e.exerciseId} width={56} />
               <View style={{ flex: 1 }}>
                 <Text style={{ color: t.ink, fontSize: 16, fontWeight: '600' }}>{e.name}</Text>
                 <Text style={{ color: t.muted, fontSize: 13 }}>

@@ -6,7 +6,7 @@ Snap the gym, confirm the kit, get a plan. Every confirmed scan is saved to a sh
 
 | Path | What it is |
 | --- | --- |
-| `packages/core` | Plan engine, 89-exercise library, "machine taken" swaps, scan clean-up. Pure TypeScript, fully tested. |
+| `packages/core` | Plan engine, 89-exercise library with an animated demo for every exercise, "machine taken" swaps, scan clean-up. Pure TypeScript, fully tested. |
 | `apps/mobile` | Expo (SDK 58) app for iOS and Android: home, near me, scan, confirm kit, goals, plan, train. |
 | `supabase/migrations` | Shared gym map, scan counter, pro flag, row-level security. |
 | `supabase/functions/detect-equipment` | Photos to equipment list via Claude vision. Photos are not stored. Free-tier scan limit lives here. |
@@ -48,10 +48,9 @@ Before the first build, change `bundleIdentifier` and `package` in `app.json` to
 
 ## Checks
 
-`npm test` runs the engine tests. `npm run typecheck` checks the engine and the app. CI runs both plus a Deno check of the edge functions on every push.
+`npm test` runs the engine and demo tests. `npx vite-node packages/core/tools/sheet.ts sheet.html` renders every demo pose to one page for a visual check. `npm run typecheck` checks the engine and the app. CI runs both plus a Deno check of the edge functions on every push.
 
 ## Not built yet
 
-- Animated exercise demos (each exercise links to real-person videos for now)
 - Paywall and RevenueCat (the `profiles.is_pro` flag and scan limit are ready for it)
 - Video pan scanning, Apple Health and Google Health Connect

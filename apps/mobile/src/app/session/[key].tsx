@@ -2,6 +2,7 @@ import { demoVideoUrl, getExercise, getSwaps, setsForWeek, type PlannedExercise 
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { Linking, Modal, Pressable, Text, TextInput, View } from 'react-native';
+import { DemoThumb, ExerciseDemo } from '../../components/ExerciseDemo';
 import { RestTimer, type RestState } from '../../components/RestTimer';
 import { Button, Card, H2, Label, Notice, P, Row, Screen } from '../../components/ui';
 import { setState, useStore, type SetLog } from '../../lib/store';
@@ -17,7 +18,8 @@ export default function SessionScreen() {
   const logs = useStore((s) => s.logs);
   const order = useStore((s) => s.sessionOrder);
   const [rest, setRest] = useState<RestState | null>(null);
-  const [open, setOpen] = useState<string | null>(null);
+  // undefined = nothing chosen yet, so the first exercise starts open.
+  const [open, setOpen] = useState<string | null | undefined>(undefined);
   const [swapFor, setSwapFor] = useState<PlannedExercise | null>(null);
 
   const session = plan?.sessions.find((s) => s.key === key);
@@ -65,19 +67,25 @@ export default function SessionScreen() {
           const sets = setsForWeek(e, rule);
           const log = logs[logKey(e)];
           const prev = lastWeek(e);
-          const expanded = open === e.exerciseId;
+          const expanded = (open === undefined ? list[0]?.exerciseId : open) === e.exerciseId;
           return (
             <Card key={e.exerciseId}>
-              <Pressable accessibilityRole="button" accessibilityState={{ expanded }} onPress={() => setOpen(expanded ? null : e.exerciseId)}>
-                <H2>{e.name}</H2>
-                <P muted small>
-                  {e.pattern === 'conditioning' ? e.reps : `${sets} sets x ${e.reps}`}{e.restSec ? ` · rest ${e.restSec}s` : ''}{e.tempo ? ` · ${e.tempo}` : ''}
-                </P>
-                {e.note ? <Text style={{ color: t.warn, fontSize: 12 }}>{e.note}</Text> : null}
+              <Pressable accessibilityRole="button" accessibilityState={{ expanded }} accessibilityHint="Shows the demo and form cues" onPress={() => setOpen(expanded ? null : e.exerciseId)}
+                style={{ flexDirection: 'row', gap: space(3), alignItems: 'center' }}>
+                {!expanded ? <DemoThumb exerciseId={e.exerciseId} /> : null}
+                <View style={{ flex: 1 }}>
+                  <H2>{e.name}</H2>
+                  <P muted small>
+                    {e.pattern === 'conditioning' ? e.reps : `${sets} sets x ${e.reps}`}{e.restSec ? ` · rest ${e.restSec}s` : ''}{e.tempo ? ` · ${e.tempo}` : ''}
+                  </P>
+                  {e.note ? <Text style={{ color: t.warn, fontSize: 12 }}>{e.note}</Text> : null}
+                  {!expanded ? <Text style={{ color: t.muted, fontSize: 12, marginTop: 2 }}>Tap for demo and cues</Text> : null}
+                </View>
               </Pressable>
 
               {expanded ? (
                 <View style={{ gap: space(1), paddingVertical: space(1) }}>
+                  <ExerciseDemo exerciseId={e.exerciseId} name={e.name} />
                   {ex.cues.map((c) => <P key={c} small>• {c}</P>)}
                   <P muted small>Works: {ex.muscles.join(', ')}</P>
                 </View>
@@ -136,9 +144,12 @@ export default function SessionScreen() {
           <P muted small>Same sets and reps, using kit that's free right now. Just for today.</P>
           {swaps.length === 0 ? <P>No good swap here. Try “Do later” and come back to it.</P> : null}
           {swaps.map((s) => (
-            <Card key={s.exercise.id} onPress={() => swapFor && applySwap(swapFor, s.exercise.id)}>
-              <Text style={{ color: t.ink, fontWeight: '700', fontSize: 16 }}>{s.exercise.name}</Text>
-              <P muted small>{s.reason}</P>
+            <Card key={s.exercise.id} onPress={() => swapFor && applySwap(swapFor, s.exercise.id)} style={{ flexDirection: 'row', alignItems: 'center', gap: space(3) }}>
+              <DemoThumb exerciseId={s.exercise.id} width={64} />
+              <View style={{ flex: 1 }}>
+                <Text style={{ color: t.ink, fontWeight: '700', fontSize: 16 }}>{s.exercise.name}</Text>
+                <P muted small>{s.reason}</P>
+              </View>
             </Card>
           ))}
           <Button kind="quiet" title="Cancel" onPress={() => setSwapFor(null)} />
