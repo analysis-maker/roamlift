@@ -1,0 +1,24 @@
+{
+  "name": "Roamlift",
+  "short_name": "Roamlift",
+  "description": "Snap any gym, get a workout plan.",
+  "start_url": "/roamlift/",
+  "scope": "/roamlift/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#10181C",
+  "theme_color": "#10181C",
+  "icons": [
+    {
+      "src": "/roamlift/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/roamlift/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
