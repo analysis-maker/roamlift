@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <rect width="1024" height="1024" fill="#10181C"/>
+  <!-- map pin -->
+  <path d="M512 150c-150 0-270 118-270 266 0 196 270 458 270 458s270-262 270-458c0-148-120-266-270-266z" fill="#FF9F1C"/>
+  <!-- dumbbell inside the pin -->
+  <g fill="#10181C">
+    <rect x="352" y="378" width="54" height="120" rx="14"/>
+    <rect x="618" y="378" width="54" height="120" rx="14"/>
+    <rect x="312" y="398" width="40" height="80" rx="12"/>
+    <rect x="672" y="398" width="40" height="80" rx="12"/>
+    <rect x="406" y="420" width="212" height="36" rx="10"/>
+  </g>
+</svg>
