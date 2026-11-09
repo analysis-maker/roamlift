@@ -29,6 +29,7 @@ export default function RootLayout() {
         <Stack.Screen name="goals" options={{ title: 'Your plan' }} />
         <Stack.Screen name="plan" options={{ title: 'Plan' }} />
         <Stack.Screen name="session/[key]" options={{ title: 'Train' }} />
+        <Stack.Screen name="history" options={{ title: 'Progress' }} />
       </Stack>
     </SafeAreaProvider>
   );

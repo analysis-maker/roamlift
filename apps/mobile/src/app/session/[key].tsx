@@ -1,4 +1,5 @@
-import { demoVideoUrl, getExercise, getSwaps, setsForWeek, type PlannedExercise } from '@roamlift/core';
+import { goHome } from '../../lib/nav';
+import { demoVideoUrl, getExercise, getSwaps, lastTime, nextTimeAdvice, setsForWeek, type PlannedExercise } from '@roamlift/core';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { Linking, Modal, Pressable, Text, TextInput, View } from 'react-native';
@@ -6,6 +7,7 @@ import { DemoThumb, ExerciseDemo } from '../../components/ExerciseDemo';
 import { RestTimer, type RestState } from '../../components/RestTimer';
 import { Button, Card, H2, Label, Notice, P, Row, Screen } from '../../components/ui';
 import { setState, useStore, type SetLog } from '../../lib/store';
+import { finishWorkout } from '../../lib/workout';
 import { space, useTheme } from '../../lib/theme';
 
 export default function SessionScreen() {
@@ -17,6 +19,7 @@ export default function SessionScreen() {
   const profile = useStore((s) => s.profile);
   const logs = useStore((s) => s.logs);
   const order = useStore((s) => s.sessionOrder);
+  const history = useStore((s) => s.history);
   const [rest, setRest] = useState<RestState | null>(null);
   // undefined = nothing chosen yet, so the first exercise starts open.
   const [open, setOpen] = useState<string | null | undefined>(undefined);
@@ -24,7 +27,7 @@ export default function SessionScreen() {
 
   const session = plan?.sessions.find((s) => s.key === key);
   if (!plan || !session) {
-    return <Screen><P>That session isn't in your current plan.</P><Button title="Home" onPress={() => router.replace('/')} /></Screen>;
+    return <Screen><P>That session isn't in your current plan.</P><Button title="Home" onPress={() => goHome()} /></Screen>;
   }
 
   const rule = plan.weeks[week - 1];
@@ -34,7 +37,6 @@ export default function SessionScreen() {
   const logKey = (e: PlannedExercise) => `${dayKey}:${e.exerciseId}`;
   const updateLog = (e: PlannedExercise, patch: Partial<SetLog>) =>
     setState((s) => ({ logs: { ...s.logs, [logKey(e)]: { ...{ done: [] as boolean[] }, ...s.logs[logKey(e)], ...patch } } }));
-  const lastWeek = (e: PlannedExercise) => logs[`${week - 1}:${session.key}:${e.exerciseId}`];
 
   const tapSet = (e: PlannedExercise, i: number) => {
     const done = [...(logs[logKey(e)]?.done ?? [])];
@@ -66,7 +68,8 @@ export default function SessionScreen() {
           const ex = getExercise(e.exerciseId);
           const sets = setsForWeek(e, rule);
           const log = logs[logKey(e)];
-          const prev = lastWeek(e);
+          const last = lastTime(e.exerciseId, history);
+          const advice = e.pattern === 'conditioning' ? null : nextTimeAdvice(last);
           const expanded = (open === undefined ? list[0]?.exerciseId : open) === e.exerciseId;
           return (
             <Card key={e.exerciseId}>
@@ -107,15 +110,34 @@ export default function SessionScreen() {
                 <Button kind="secondary" title={log?.done?.[0] ? 'Done ✓' : 'Mark done'} onPress={() => updateLog(e, { done: [!log?.done?.[0]] })} />
               )}
 
+              {advice ? (
+                <Text style={{ color: advice.kind === 'up' ? t.good : advice.kind === 'down' ? t.warn : t.muted, fontSize: 13, fontWeight: advice.kind === 'up' ? '700' : '400' }}>
+                  {advice.text}{last && last.log.gymName !== gym?.name ? ` (${last.log.gymName})` : ''}
+                </Text>
+              ) : null}
+
               {e.pattern !== 'conditioning' ? (
-                <Row>
-                  <View style={{ flex: 1 }}>
-                    <Label>Weight used</Label>
+                <Row gap={4}>
+                  <View style={{ flex: 2 }}>
+                    <Label>Weight</Label>
                     <TextInput
                       value={log?.weight ?? ''}
                       onChangeText={(v) => updateLog(e, { weight: v })}
-                      placeholder={prev?.weight ? `Last week ${prev.weight}` : 'e.g. 12 kg or pin 5'}
+                      placeholder={last?.exact && last.entry.weight ? last.entry.weight : 'e.g. 12 kg or pin 5'}
                       placeholderTextColor={t.muted}
+                      accessibilityLabel={`Weight for ${e.name}`}
+                      style={{ color: t.ink, borderBottomWidth: 1, borderBottomColor: t.line, paddingVertical: space(2), fontSize: 16 }}
+                    />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Label>Reps</Label>
+                    <TextInput
+                      value={log?.reps ?? ''}
+                      onChangeText={(v) => updateLog(e, { reps: v.replace(/[^0-9]/g, '') })}
+                      placeholder={e.reps.split(' ')[0]}
+                      placeholderTextColor={t.muted}
+                      keyboardType="number-pad"
+                      accessibilityLabel={`Reps for ${e.name}`}
                       style={{ color: t.ink, borderBottomWidth: 1, borderBottomColor: t.line, paddingVertical: space(2), fontSize: 16 }}
                     />
                   </View>
@@ -131,7 +153,7 @@ export default function SessionScreen() {
           );
         })}
 
-        <Button title="Finish workout" onPress={() => router.replace('/')} />
+        <Button title="Finish workout" onPress={() => { const saved = finishWorkout(session.key, list); if (saved) router.replace('/history'); else goHome(); }} />
         <View style={{ height: 96 }} />
       </Screen>
 

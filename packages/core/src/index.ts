@@ -6,3 +6,4 @@ export * from './swaps';
 export * from './detection';
 export { mulberry32 } from './random';
 export * from './demos';
+export * from './history';

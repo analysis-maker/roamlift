@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from 'react';
-import type { DetectedKitItem, EquipmentId, Focus, Goal, Level, Plan, PlannedExercise, Region } from '@roamlift/core';
+import type { DetectedKitItem, EquipmentId, Focus, Goal, Level, Plan, PlannedExercise, Region, WorkoutLog } from '@roamlift/core';
 import { load, save } from './storage';
 
 export interface Gym {
@@ -41,6 +41,12 @@ export interface State {
   /** Today-only swaps and reorders, key `${week}:${sessionKey}`. The plan itself is untouched. */
   sessionOrder: Record<string, PlannedExercise[]>;
   recentGyms: Gym[];
+  /** Finished workouts, newest last. Kept forever on the phone; the free tier shows the last 30 days. */
+  history: WorkoutLog[];
+  /** Set from the store subscription once the paywall ships. */
+  isPro: boolean;
+  /** When the current plan was built, so old history doesn't count toward this plan's weeks. */
+  planStartedAt: string;
 }
 
 const KEY = 'roamlift.v1';
@@ -56,6 +62,9 @@ const initial: State = {
   logs: {},
   sessionOrder: {},
   recentGyms: [],
+  history: [],
+  isPro: false,
+  planStartedAt: '',
 };
 
 let state: State = load(KEY, initial);

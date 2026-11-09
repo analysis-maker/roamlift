@@ -16,5 +16,5 @@ export function buildPlan(seed = getState().seed): void {
     excludeIds: excluded,
     seed,
   });
-  setState({ plan, seed, week: 1, sessionOrder: {} });
+  setState({ plan, seed, week: 1, sessionOrder: {}, logs: {}, planStartedAt: new Date().toISOString() }); // history is kept; only in-progress ticks reset
 }

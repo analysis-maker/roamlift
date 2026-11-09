@@ -7,7 +7,7 @@ Snap the gym, confirm the kit, get a plan. Every confirmed scan is saved to a sh
 | Path | What it is |
 | --- | --- |
 | `packages/core` | Plan engine, 89-exercise library with an animated demo for every exercise, "machine taken" swaps, scan clean-up. Pure TypeScript, fully tested. |
-| `apps/mobile` | Expo (SDK 58) app for iOS and Android: home, near me, scan, confirm kit, goals, plan, train. |
+| `apps/mobile` | Expo (SDK 58) app for iOS and Android: home, near me, scan, confirm kit, goals, plan, train, progress. |
 | `supabase/migrations` | Shared gym map, scan counter, pro flag, row-level security. |
 | `supabase/functions/detect-equipment` | Photos to equipment list via Claude vision. Photos are not stored. Free-tier scan limit lives here. |
 | `supabase/functions/places-nearby` | Google Places (New) nearby search joined with kit already on the map. |
