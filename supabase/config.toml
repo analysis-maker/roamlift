@@ -1,0 +1,7 @@
+# Minimal config for `supabase start` / `supabase functions deploy`.
+project_id = "roamlift"
+
+[auth]
+enabled = true
+# Each device gets an anonymous account so it can add to the shared gym map.
+enable_anonymous_sign_ins = true

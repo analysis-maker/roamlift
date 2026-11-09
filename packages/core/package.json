@@ -1,0 +1,16 @@
+{
+  "name": "@roamlift/core",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Plan engine, exercise library, swaps and scan normalisation for Roamlift.",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "~6.0.3",
+    "vitest": "^3.2.4"
+  }
+}

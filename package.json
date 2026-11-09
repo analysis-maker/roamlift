@@ -1,0 +1,13 @@
+{
+  "name": "roamlift",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "test": "npm test -w @roamlift/core",
+    "typecheck": "npm run typecheck -w @roamlift/core && npm run typecheck -w @roamlift/mobile",
+    "mobile": "npm run start -w @roamlift/mobile"
+  }
+}
